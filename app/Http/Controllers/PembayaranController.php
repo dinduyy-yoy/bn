@@ -100,8 +100,13 @@ class PembayaranController extends Controller
 
         // cek apakah ada file bukti pembayaran
         if ($request->hasFile('bukti_pembayaran')) {
-            $buktiPath = Cloudinary::upload($request->file('bukti_pembayaran')->getRealPath())->getSecurePath();
+            try {
+                $buktiPath = cloudinary()->upload($request->file('bukti_pembayaran')->getRealPath())->getSecurePath();
+            } catch (\Exception $e) {
+                return response()->json(['message' => 'Gagal upload ke Cloudinary: ' . $e->getMessage()], 500);
+            }
         }
+
 
 
         $isCustom = !is_numeric($request->metode_pembayaran_id);

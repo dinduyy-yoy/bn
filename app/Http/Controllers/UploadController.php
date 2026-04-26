@@ -16,7 +16,7 @@ class UploadController extends Controller
 
         if ($request->hasFile('foto_event')) {
             try {
-                $uploadedFileUrl = Cloudinary::upload($request->file('foto_event')->getRealPath())->getSecurePath();
+                $uploadedFileUrl = cloudinary()->upload($request->file('foto_event')->getRealPath())->getSecurePath();
 
                 return response()->json([
                     'message' => 'Poster berhasil diupload',
