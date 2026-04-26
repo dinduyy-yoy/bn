@@ -24,9 +24,13 @@ class Pembayaran extends Model
     public function getBuktiPembayaranUrlAttribute()
     {
         if (!$this->bukti_pembayaran) return null;
+        if (filter_var($this->bukti_pembayaran, FILTER_VALIDATE_URL)) {
+            return $this->bukti_pembayaran;
+        }
         $path = str_replace('\\', '/', ltrim($this->bukti_pembayaran, '/'));
         return url('storage/' . $path);
     }
+
 
     public function pendaftaran()
     {

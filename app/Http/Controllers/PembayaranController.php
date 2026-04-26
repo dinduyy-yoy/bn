@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Pembayaran;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class PembayaranController extends Controller
 {
@@ -99,13 +100,7 @@ class PembayaranController extends Controller
 
         // cek apakah ada file bukti pembayaran
         if ($request->hasFile('bukti_pembayaran')) {
-
-            $file = $request->file('bukti_pembayaran');
-
-            $filename = time().'_'.$file->getClientOriginalName();
-
-            // simpan ke storage
-            $buktiPath = $file->storeAs('bukti_pembayaran', $filename, 'public');
+            $buktiPath = Cloudinary::upload($request->file('bukti_pembayaran')->getRealPath())->getSecurePath();
         }
 
 

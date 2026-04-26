@@ -9,6 +9,7 @@ use App\Models\PendaftaranEvent;
 use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Str;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class SertifikatController extends Controller
 {
@@ -34,13 +35,7 @@ class SertifikatController extends Controller
         }
 
         if ($request->hasFile('template')) {
-            // Hapus template lama jika ada
-            if ($event->sertifikat_template) {
-                Storage::disk('public')->delete(str_replace('/storage/', '', $event->sertifikat_template));
-            }
-
-            $path = $request->file('template')->store('sertifikat/templates', 'public');
-            $event->sertifikat_template = '/storage/' . $path;
+            $event->sertifikat_template = Cloudinary::upload($request->file('template')->getRealPath())->getSecurePath();
         }
 
         $event->sertifikat_config = json_decode($request->config, true);
@@ -116,17 +111,9 @@ class SertifikatController extends Controller
         $berhasil = 0;
         $gagal = 0;
 
-        // Path ke template lokal (bukan URL) agar bisa dibaca dompdf
-        $templatePath = public_path(str_replace('/storage/', 'storage/', $event->sertifikat_template));
-        
-        if (!file_exists($templatePath)) {
-             return response()->json(['message' => 'File template fisik tidak ditemukan di server'], 500);
-        }
-
         // Konversi ke base64 agar mudah di-load di DOMPDF
-        $type = pathinfo($templatePath, PATHINFO_EXTENSION);
-        $data = file_get_contents($templatePath);
-        $base64Template = 'data:image/' . $type . ';base64,' . base64_encode($data);
+        $data = file_get_contents($event->sertifikat_template);
+        $base64Template = 'data:image/png;base64,' . base64_encode($data);
 
         $config = $event->sertifikat_config ?: [
             'x' => '50%',
