@@ -306,10 +306,13 @@ class AuthController extends Controller
 
         $validated = $request->validate([
             'nama_lengkap' => ['required', 'string', 'max:255'],
+            'username'     => ['required', 'string', 'max:255', 'unique:users,username,' . $user->id_user . ',id_user'],
             'no_hp'        => ['nullable', 'string', 'max:15'],
             'avatar'       => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
         ], [
             'nama_lengkap.required' => 'Nama lengkap wajib diisi',
+            'username.required'     => 'Username wajib diisi',
+            'username.unique'       => 'Username sudah digunakan',
             'avatar.image'         => 'File harus berupa gambar',
             'avatar.mimes'         => 'Format gambar harus jpeg, png, atau jpg',
             'avatar.max'           => 'Ukuran gambar maksimal 2MB',
@@ -317,6 +320,7 @@ class AuthController extends Controller
 
         $updateData = [
             'nama_lengkap' => $validated['nama_lengkap'],
+            'username'     => $validated['username'],
             'no_hp'        => $validated['no_hp'],
         ];
 
