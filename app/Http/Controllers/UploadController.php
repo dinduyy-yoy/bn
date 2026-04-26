@@ -15,14 +15,19 @@ class UploadController extends Controller
         ]);
 
         if ($request->hasFile('foto_event')) {
-            $uploadedFileUrl = Cloudinary::upload($request->file('foto_event'))->getSecurePath();
+            try {
+                $uploadedFileUrl = Cloudinary::upload($request->file('foto_event')->getRealPath())->getSecurePath();
 
-
-            return response()->json([
-                'message' => 'Poster berhasil diupload',
-                'filename' => $uploadedFileUrl,
-                'url' => $uploadedFileUrl
-            ], 200);
+                return response()->json([
+                    'message' => 'Poster berhasil diupload',
+                    'filename' => $uploadedFileUrl,
+                    'url' => $uploadedFileUrl
+                ], 200);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'message' => 'Gagal upload ke Cloudinary: ' . $e->getMessage()
+                ], 500);
+            }
         }
 
 

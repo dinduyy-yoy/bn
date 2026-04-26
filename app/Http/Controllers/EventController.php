@@ -74,8 +74,13 @@ class EventController extends Controller
         $namaFile = 'default-event.jpg';
 
         if ($request->hasFile('foto_event')) {
-            $namaFile = Cloudinary::upload($request->file('foto_event')->getRealPath())->getSecurePath();
+            try {
+                $namaFile = Cloudinary::upload($request->file('foto_event')->getRealPath())->getSecurePath();
+            } catch (\Exception $e) {
+                return response()->json(['message' => 'Gagal upload ke Cloudinary: ' . $e->getMessage()], 500);
+            }
         }
+
 
 
         $event = Event::create([
@@ -136,8 +141,13 @@ class EventController extends Controller
         $namaFile = $event->foto_event ?: 'default-event.jpg';
 
         if ($request->hasFile('foto_event')) {
-            $namaFile = Cloudinary::upload($request->file('foto_event')->getRealPath())->getSecurePath();
+            try {
+                $namaFile = Cloudinary::upload($request->file('foto_event')->getRealPath())->getSecurePath();
+            } catch (\Exception $e) {
+                return response()->json(['message' => 'Gagal upload ke Cloudinary: ' . $e->getMessage()], 500);
+            }
         }
+
 
 
         $event->update([
