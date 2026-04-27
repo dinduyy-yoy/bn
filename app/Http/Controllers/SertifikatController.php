@@ -101,11 +101,10 @@ class SertifikatController extends Controller
         // Ambil pendaftaran yang memenuhi syarat:
         // 1. Hadir
         // 2. Pembayaran terverifikasi ATAU tiket gratis
-        // 3. Belum punya sertifikat
         $pendaftarans = PendaftaranEvent::with(['user', 'pembayaran'])
             ->where('event_id', $event_id)
             ->where('status_pendaftaran', 'hadir')
-            ->whereNull('sertifikat_url')
+            // ->whereNull('sertifikat_url') // Dihapus agar bisa re-generate jika template diubah atau URL lama rusak
             ->get();
 
         $berhasil = 0;
