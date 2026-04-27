@@ -154,14 +154,19 @@ class SertifikatController extends Controller
                 // Render PDF
                 $pdf = Pdf::loadView('sertifikat.template', $dataView)->setPaper('a4', 'landscape');
                 
-                // Simpan ke storage lokal
+                // Simpan langsung ke folder public (agar terhindar dari isu symlink 404 di Railway)
                 $fileName = 'sertifikat_' . Str::slug($event->nama_event) . '_' . Str::slug($nama_peserta) . '_' . uniqid() . '.pdf';
-                $filePath = 'sertifikat/generated/' . $fileName;
+                $publicPath = public_path('sertifikat/generated');
                 
-                Storage::disk('public')->put($filePath, $pdf->output());
+                // Pastikan folder exist
+                if (!file_exists($publicPath)) {
+                    mkdir($publicPath, 0755, true);
+                }
+                
+                file_put_contents($publicPath . '/' . $fileName, $pdf->output());
 
                 // Update database
-                $pendaftaran->sertifikat_url = '/storage/' . $filePath;
+                $pendaftaran->sertifikat_url = '/sertifikat/generated/' . $fileName;
                 $pendaftaran->save();
 
                 $berhasil++;
