@@ -112,7 +112,11 @@ class SertifikatController extends Controller
         $gagal = 0;
 
         // Konversi ke base64 agar mudah di-load di DOMPDF
-        $data = file_get_contents($event->sertifikat_template);
+        try {
+            $data = \Illuminate\Support\Facades\Http::get($event->sertifikat_template)->body();
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Gagal mengunduh template dari server gambar'], 500);
+        }
         $base64Template = 'data:image/png;base64,' . base64_encode($data);
 
         $config = $event->sertifikat_config ?: [
@@ -158,8 +162,9 @@ class SertifikatController extends Controller
 
                 $berhasil++;
             } catch (\Exception $e) {
-                // Log error jika diperlukan: \Log::error($e->getMessage());
+                \Log::error('Cert Error: ' . $e->getMessage() . ' Trace: ' . $e->getTraceAsString());
                 $gagal++;
+                $lastError = $e->getMessage();
             }
         }
 
@@ -168,7 +173,8 @@ class SertifikatController extends Controller
             'summary' => [
                 'total_diproses' => $berhasil + $gagal,
                 'berhasil' => $berhasil,
-                'gagal' => $gagal
+                'gagal' => $gagal,
+                'last_error' => $lastError ?? null
             ]
         ], 200);
     }
