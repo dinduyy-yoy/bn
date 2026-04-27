@@ -154,23 +154,15 @@ class SertifikatController extends Controller
                 // Render PDF
                 $pdf = Pdf::loadView('sertifikat.template', $dataView)->setPaper('a4', 'landscape');
                 
-                // Simpan ke temporary storage
+                // Simpan ke storage lokal
                 $fileName = 'sertifikat_' . Str::slug($event->nama_event) . '_' . Str::slug($nama_peserta) . '_' . uniqid() . '.pdf';
-                $tempPath = sys_get_temp_dir() . '/' . $fileName;
+                $filePath = 'sertifikat/generated/' . $fileName;
                 
-                file_put_contents($tempPath, $pdf->output());
-
-                // Upload ke Cloudinary sebagai raw document (PDF) menggunakan native SDK
-                $upload = cloudinary()->uploadApi()->upload($tempPath, [
-                    'resource_type' => 'raw'
-                ]);
+                Storage::disk('public')->put($filePath, $pdf->output());
 
                 // Update database
-                $pendaftaran->sertifikat_url = $upload['secure_url'];
+                $pendaftaran->sertifikat_url = '/storage/' . $filePath;
                 $pendaftaran->save();
-
-                // Bersihkan file sementara
-                unlink($tempPath);
 
                 $berhasil++;
             } catch (\Exception $e) {
