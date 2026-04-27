@@ -27,7 +27,7 @@ class AuthController extends Controller
             'kategori_pendaftar' => $user->kategori_pendaftar,
             'role'               => $user->role,
             'avatar'             => $user->avatar,
-            'avatarUrl'          => $user->avatar ? url('avatars/' . $user->avatar) : null,
+            'avatarUrl'          => filter_var($user->avatar, FILTER_VALIDATE_URL) ? $user->avatar : ($user->avatar ? url('avatars/' . $user->avatar) : null),
             'email_verified_at'  => $user->email_verified_at,
         ];
     }
@@ -325,15 +325,13 @@ class AuthController extends Controller
         ];
 
         if ($request->hasFile('avatar')) {
-            // Hapus avatar lama jika ada
-            if ($user->avatar && file_exists(public_path('avatars/' . $user->avatar))) {
-                unlink(public_path('avatars/' . $user->avatar));
+            // Hapus avatar lama di Cloudinary tidak mandatory, tapi kita bisa upload gambar baru
+            try {
+                $uploadedUrl = \CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary::upload($request->file('avatar')->getRealPath())->getSecurePath();
+                $updateData['avatar'] = $uploadedUrl;
+            } catch (\Exception $e) {
+                \Log::error('Upload avatar gagal: ' . $e->getMessage());
             }
-
-            $file = $request->file('avatar');
-            $filename = time() . '_' . $user->id_user . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('avatars'), $filename);
-            $updateData['avatar'] = $filename;
         }
 
         $user->update($updateData);

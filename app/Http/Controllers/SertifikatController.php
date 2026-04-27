@@ -150,15 +150,21 @@ class SertifikatController extends Controller
                 // Render PDF
                 $pdf = Pdf::loadView('sertifikat.template', $dataView)->setPaper('a4', 'landscape');
                 
-                // Simpan ke storage
+                // Simpan ke temporary storage
                 $fileName = 'sertifikat_' . Str::slug($event->nama_event) . '_' . Str::slug($nama_peserta) . '_' . uniqid() . '.pdf';
-                $filePath = 'sertifikat/generated/' . $fileName;
+                $tempPath = sys_get_temp_dir() . '/' . $fileName;
                 
-                Storage::disk('public')->put($filePath, $pdf->output());
+                file_put_contents($tempPath, $pdf->output());
+
+                // Upload ke Cloudinary
+                $upload = Cloudinary::upload($tempPath, ['resource_type' => 'auto']);
 
                 // Update database
-                $pendaftaran->sertifikat_url = '/storage/' . $filePath;
+                $pendaftaran->sertifikat_url = $upload->getSecurePath();
                 $pendaftaran->save();
+
+                // Bersihkan file sementara
+                unlink($tempPath);
 
                 $berhasil++;
             } catch (\Exception $e) {
@@ -196,7 +202,7 @@ class SertifikatController extends Controller
                     'id' => $pendaftaran->id,
                     'event_name' => optional($pendaftaran->event)->nama_event,
                     'event_date' => optional($pendaftaran->event)->tanggal,
-                    'sertifikat_url' => url($pendaftaran->sertifikat_url),
+                    'sertifikat_url' => filter_var($pendaftaran->sertifikat_url, FILTER_VALIDATE_URL) ? $pendaftaran->sertifikat_url : url($pendaftaran->sertifikat_url),
                     'generated_at' => $pendaftaran->updated_at
                 ];
             });
