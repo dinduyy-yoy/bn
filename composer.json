@@ -10,6 +10,7 @@
     "require": {
         "php": "^8.2",
         "ext-pdo_mysql": "*",
+        "ext-gd": "*",
         "barryvdh/laravel-dompdf": "^2.2",
         "cloudinary-labs/cloudinary-laravel": "^2.3",
         "guzzlehttp/guzzle": "^7.2",
