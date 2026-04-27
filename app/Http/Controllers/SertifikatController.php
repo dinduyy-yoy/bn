@@ -155,8 +155,8 @@ class SertifikatController extends Controller
                 
                 file_put_contents($tempPath, $pdf->output());
 
-                // Upload ke Cloudinary
-                $upload = Cloudinary::upload($tempPath, ['resource_type' => 'auto']);
+                // Upload ke Cloudinary sebagai raw document (PDF)
+                $upload = Cloudinary::uploadFile($tempPath);
 
                 // Update database
                 $pendaftaran->sertifikat_url = $upload->getSecurePath();
