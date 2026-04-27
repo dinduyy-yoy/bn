@@ -116,7 +116,12 @@ class SertifikatController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message' => 'Gagal mengunduh template dari server gambar'], 500);
         }
-        $base64Template = 'data:image/png;base64,' . base64_encode($data);
+        // Deteksi mime type dari URL
+        $mime = 'image/jpeg';
+        if (str_ends_with(strtolower($event->sertifikat_template), '.png')) {
+            $mime = 'image/png';
+        }
+        $base64Template = 'data:' . $mime . ';base64,' . base64_encode($data);
 
         $config = $event->sertifikat_config ?: [
             'x' => '50%',
@@ -155,11 +160,13 @@ class SertifikatController extends Controller
                 
                 file_put_contents($tempPath, $pdf->output());
 
-                // Upload ke Cloudinary sebagai raw document (PDF)
-                $upload = Cloudinary::uploadFile($tempPath);
+                // Upload ke Cloudinary sebagai raw document (PDF) menggunakan native SDK
+                $upload = cloudinary()->uploadApi()->upload($tempPath, [
+                    'resource_type' => 'raw'
+                ]);
 
                 // Update database
-                $pendaftaran->sertifikat_url = $upload->getSecurePath();
+                $pendaftaran->sertifikat_url = $upload['secure_url'];
                 $pendaftaran->save();
 
                 // Bersihkan file sementara
