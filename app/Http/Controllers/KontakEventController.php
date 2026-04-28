@@ -14,7 +14,7 @@ class KontakEventController extends Controller
     {
         $kontak = KontakEvent::create([
             'nama' => $request->nama,
-            'email' => $request->email,
+            'email' => trim($request->email),
             'no_hp' => $request->no_hp,
             'judul_event' => $request->judul_event,
             'deskripsi_event' => $request->deskripsi_event ?? '',
@@ -83,6 +83,7 @@ class KontakEventController extends Controller
                 'balasan' => $request->balasan
             ]));
         } catch (\Exception $e) {
+            \Log::error('Gagal kirim balasan email: ' . $e->getMessage());
             return response()->json([
                 'message' => 'Gagal mengirim email: ' . $e->getMessage()
             ], 500);

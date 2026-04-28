@@ -94,7 +94,10 @@ class AuthController extends Controller
             Mail::to($user->email)->send(new OTPMail($user->nama_lengkap, $otp));
         } catch (\Exception $e) {
             // Log error tapi jangan gagalkan registrasi
-            \Log::error('Gagal kirim email OTP: ' . $e->getMessage());
+            \Log::error('Gagal kirim email OTP saat registrasi: ' . $e->getMessage(), [
+                'email' => $user->email,
+                'exception' => $e
+            ]);
         }
 
         return response()->json([
@@ -211,7 +214,10 @@ class AuthController extends Controller
         try {
             Mail::to($email)->send(new ResetPasswordMail($user->nama_lengkap, $resetUrl));
         } catch (\Exception $e) {
-            \Log::error('Gagal kirim email reset password: ' . $e->getMessage());
+            \Log::error('Gagal kirim email reset password: ' . $e->getMessage(), [
+                'email' => $email,
+                'exception' => $e
+            ]);
         }
 
         return response()->json([
