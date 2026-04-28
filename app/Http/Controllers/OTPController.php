@@ -144,7 +144,7 @@ class OTPController extends Controller
         // Kirim email OTP
         try {
             Mail::to($user->email)->send(new OTPMail($user->nama_lengkap, $otp));
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             \Log::error('Gagal kirim ulang OTP: ' . $e->getMessage(), [
                 'email' => $user->email,
                 'exception' => $e

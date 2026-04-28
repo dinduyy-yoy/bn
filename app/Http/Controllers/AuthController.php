@@ -72,6 +72,10 @@ class AuthController extends Controller
         $validated['email']    = strtolower(trim($validated['email']));
         $validated['password'] = Hash::make($validated['password']);
         $validated['role']     = 'user';
+        
+        // Generate default username from email prefix + random string
+        $usernamePrefix = strstr($validated['email'], '@', true);
+        $validated['username'] = $usernamePrefix . '_' . Str::random(4);
 
         $user = User::create($validated);
 
@@ -92,7 +96,7 @@ class AuthController extends Controller
         // Kirim OTP via email
         try {
             Mail::to($user->email)->send(new OTPMail($user->nama_lengkap, $otp));
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             // Log error tapi jangan gagalkan registrasi
             \Log::error('Gagal kirim email OTP saat registrasi: ' . $e->getMessage(), [
                 'email' => $user->email,
