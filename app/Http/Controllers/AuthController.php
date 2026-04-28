@@ -217,7 +217,7 @@ class AuthController extends Controller
 
         try {
             Mail::to($email)->send(new ResetPasswordMail($user->nama_lengkap, $resetUrl));
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             \Log::error('Gagal kirim email reset password: ' . $e->getMessage(), [
                 'email' => $email,
                 'exception' => $e

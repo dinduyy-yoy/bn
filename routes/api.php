@@ -55,6 +55,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/users', [AdminDashboardController::class, 'getAllUsers']);
     // Admin: laporan
     Route::get('/admin/laporan', [AdminDashboardController::class, 'getLaporan']);
+    Route::delete('/admin/users/{id}', [AdminDashboardController::class, 'deleteUser']);
 });
 
 // ─── Event Routes ──────────────────────────────────────────────────────────
